@@ -1,7 +1,9 @@
 import { buttonVariants } from "@/components/ui/button";
 import { CommentSection } from "@/components/web/CommentSection";
+import { PostPresence } from "@/components/web/PostPresence";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { getToken } from "@/lib/auth-server";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { ArrowLeft } from "lucide-react";
@@ -13,15 +15,29 @@ interface PostIdRouteProps {
     postId: Id<"posts">;
   }>;
 }
-export default async function PostIdRoute({ params }: PostIdRouteProps) {
+export async function generateMetadata({ params }: PostIdRouteProps) {
   const { postId } = await params;
   const post = await fetchQuery(api.posts.getPostById, { Id: postId });
-  const PreLoadedComments = await preloadQuery(
-    api.comments.getCommentsByPostId,
-    {
+  if (!post) {
+    return {
+      title: "post not found",
+    };
+  }
+  return {
+    title: post.title,
+    description: post.content,
+  };
+}
+export default async function PostIdRoute({ params }: PostIdRouteProps) {
+  const { postId } = await params;
+  const token = await getToken();
+  const [post, PreLoadedComments, userId] = await Promise.all([
+    await fetchQuery(api.posts.getPostById, { Id: postId }),
+    await preloadQuery(api.comments.getCommentsByPostId, {
       postId: postId,
-    },
-  );
+    }),
+    await fetchQuery(api.presence.getUserId, {}, { token }),
+  ]);
 
   if (!post) {
     return (
@@ -54,9 +70,13 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           {post.title}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Posted on :{new Date(post._creationTime).toLocaleDateString("en-US")}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            Posted on :{" "}
+            {new Date(post._creationTime).toLocaleDateString("en-US")}
+          </p>
+          {userId && <PostPresence roomId={post._id} userId={userId} />}
+        </div>
         <Separator className="my-8" />
         <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">
           {post.content}
