@@ -7,8 +7,6 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-export const dynamic = "force-static";
-export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "BlogPro",
@@ -34,7 +32,7 @@ export default function BlogPage() {
 }
 
 async function LoadBlogList() {
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  "use cache";
   const data = await fetchQuery(api.posts.getPosts);
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
