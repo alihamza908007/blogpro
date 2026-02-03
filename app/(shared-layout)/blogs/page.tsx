@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "BlogPro",
