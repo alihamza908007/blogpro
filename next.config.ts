@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "upbeat-toad-775.convex.cloud",
+        hostname: "fast-kudu-627.convex.cloud",
         port: "",
       },
     ],
