@@ -51,6 +51,7 @@ async function LoadBlogList() {
               alt="image"
               fill
               className="rounded-t-lg object-cover "
+              unoptimized
             />
           </div>
           <CardContent>
